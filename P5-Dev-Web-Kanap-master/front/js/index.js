@@ -1,31 +1,48 @@
-// Fetching data from backend, displaying kanaps on front page
-const host = "https://kanapjmax.herokuapp.com/";
-const getUrl = host + "api/products/";
-let cardsFetch = function () {
-  fetch(getUrl)
-    .then((response) => response.json())
-    .then((data) => {
-      console.log(data);
+//Récupération du tableau de produits disponibles
+getProducts();
 
-      let productSection = document.getElementById("items");
 
-      for (i = 0; i < data.length; i++) {
-        const productCard = `
-          <a href="./product.html?id=${data[i]._id}">
-            <article>
-              <img
-                src="${data[i].imageUrl}"
-                alt="${data[i].altTxt}"
-              />
-              <h3 class="productName">${data[i].name}</h3>
-              <p class="productDescription">
-                ${data[i].description}
-              </p>
-            </article>
-          </a>
-        `;
-        productSection.innerHTML += productCard;
-      }
+//Création des articles via la liste récupérée précédemment
+creationProducts();
+
+async function getProducts() {
+    let products = await fetch('http://127.0.0.1:3000/api/products');
+    console.log("Les produits ont été récupérés !")
+    return products.json();
+}
+
+async function creationProducts() {
+    let result = await getProducts()
+    .then( (product) => {
+        for (let i=0; i < product.length; i++) {		
+
+            // Insertion de l'élément "a"
+            let productLink = document.createElement("a");
+            document.querySelector(".items").appendChild(productLink);
+            productLink.href = `product.html?id=${product[i]._id}`;
+
+            // Insertion de l'élément "article"
+            let productArticle = document.createElement("article");
+            productLink.appendChild(productArticle);
+
+            // Insertion de l'image
+            let productImg = document.createElement("img");
+            productArticle.appendChild(productImg);
+            productImg.src = product[i].imageUrl;
+            productImg.alt = product[i].altTxt;
+
+            // Insertion du titre "h3"
+            let productName = document.createElement("h3");
+            productArticle.appendChild(productName);
+            productName.classList.add("productName");
+            productName.innerHTML = product[i].name;
+
+            // Insertion de la description "p"
+            let productDescription = document.createElement("p");
+            productArticle.appendChild(productDescription);
+            productDescription.classList.add("productName");
+            productDescription.innerHTML = product[i].description;
+        }
     });
-};
-cardsFetch();
+    console.log("Les produits ont été crées !");
+}

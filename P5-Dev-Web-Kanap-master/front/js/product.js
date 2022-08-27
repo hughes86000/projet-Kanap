@@ -1,69 +1,141 @@
-////////
-// getting id of the teddy from the single.html URL
-////////
-const str = window.location;
-const url = new URL(str);
-const id = url.searchParams.get("id");
-const host = "https://kanapjmax.herokuapp.com/";
-const objectURL = host + "api/products/" + id;
+//Récupération de l'id via les paramètres de l'url
+const idProduct = new URL(window.location.href).searchParams.get("id");
 
-/////////
-// Fetching data from backend & constructing DOM
-/////////
-let cardsFetch = function () {
-  fetch(objectURL)
-    .then((response) => response.json())
-    .then((data) => {
-      console.log(data);
-      // get data image
-      let img = document.querySelector(".item__img");
-      img.innerHTML = `<img src="${data.imageUrl}" alt="${data.altTxt}">`;
-      // data.name and title
-      let name = document.getElementById("title");
-      name.innerHTML = data.name;
-      let title = document.querySelector("title");
-      title.innerHTML = data.name;
-      // price
-      let price = document.getElementById("price");
-      price.innerHTML = `${data.price}`;
-      // description
-      let description = document.getElementById("description");
-      description.innerHTML = data.description;
-      // colors
-      let color = document.getElementById("colors");
-      for (i = 0; i < data.colors.length; i++) {
-        color.innerHTML += `<option value="${data.colors[i]}">${data.colors[i]}</option>`;
-      }
-    });
-};
-cardsFetch();
+//Récupération des sélecteurs pour les futurs modifications
+let titleProduct = document.getElementById("title");
+let priceProduct = document.getElementById("price");
+let descriptionProduct = document.getElementById("description");
+let colorsProduct = document.getElementById("colors");
+let imgProduct = document.querySelector(".item__img");
+let img = document.createElement("img");
+imgProduct.appendChild(img);
 
-////////
-//Getting HTML values from HTML
-/////////
-// function that gets quantity value of the form in the markup
-function qtyValue() {
-  let qty = document.getElementById("quantity");
-  return qty.value;
+//Récupération de l'article grace a l'id + affichage des données de ce dernier
+getArticle();
+
+//Récupération de l'article grace a l'id + affichage des données de ce dernier
+async function getArticle() {
+     await fetch("http://127.0.0.1:3000/api/products/" + idProduct)
+    .then((response) => response.json())    
+    .then(product => {
+        img.setAttribute("src", product.imageUrl);
+        img.setAttribute("alt", product.altTxt);    
+        titleProduct.innerHTML = product.name;
+        priceProduct.innerHTML = product.price;
+        descriptionProduct.innerHTML = product.description;
+        document.title = product.name;
+
+        for (let i=0; i < product.colors.length; i++) {
+            let color = document.createElement("option");
+            color.setAttribute("value", product.colors[i]);
+            color.innerHTML = product.colors[i];
+            colorsProduct.appendChild(color);
+        }  
+    });          
 }
 
-// function that get the kanap color value in the markup
-function colorValue() {
-  let color = document.getElementById("colors");
-  return color.value;
-}
+// Ajouté un article au panier
+let addToCartBtn = document.getElementById("addToCart");
+addToCartBtn.addEventListener("click", addToCart);
 
-// HTML element : button add to cart
-const toCartBtn = document.getElementById("addToCart");
-const goToCartButton = document.getElementById("goToCart");
-goToCartButton.style.display = "none";
-// at button press : toCartBtn, function addCart that activates the 2 other function by click
-toCartBtn.addEventListener("click", () => {
-  let qty = parseInt(qtyValue());
-  let color = colorValue();
-  add2Cart(id, color, qty);
-  goToCartButton.style.display = "block";
-});
-goToCartButton.addEventListener("click", () => {
-  window.location.href = "./cart.html";
-});
+function addToCart() {
+
+    const colorChoice = document. querySelector("#colors");
+    const quantityChoice = document.querySelector("#quantity");
+
+    if (quantityChoice.value > 0 && quantityChoice.value <=100 && quantityChoice.value != 0 && colorChoice.value != 0) { 
+
+        if (localStorage.getItem("cart")) {
+    
+            let productCart = JSON.parse(localStorage.getItem("cart"));
+            console.log(productCart);
+
+            let idKanap = idProduct;
+            let colorKanap = document.querySelector("#colors").value;
+            let qtyKanap = document.querySelector("#quantity").value;
+
+            const resultFind = productCart.find(
+                (el) => el.idKanap === idProduct && el.colorKanap === colorKanap);
+                //Si le produit commandé est déjà dans le panier
+                console.log("result find est egal a :");
+                console.log(resultFind);
+                console.log("fin result find");
+
+                if (resultFind) {
+                    console.log("resultfind kanap = " + resultFind.qtyKanap);
+                    console.log("qtykanap = " + qtyKanap);
+                    let newQuantite = parseInt(qtyKanap) + parseInt(resultFind.qtyKanap);
+                    console.log("newQtt est egal a : " + newQuantite);
+                    resultFind.qtyKanap = newQuantite;
+                    localStorage.setItem("cart", JSON.stringify(productCart));
+                    console.log("productCart egal :");
+                    console.log(productCart);
+                    console.log("fin productCart");
+                //Si le produit commandé n'est pas dans le panier
+                } else {
+                    
+                    let productCart = JSON.parse(localStorage.getItem("cart"));
+
+                    let idKanap = idProduct;
+                    let nameKanap = document.querySelector("#title").textContent;
+                    let colorKanap = document.querySelector("#colors").value;
+                    let qtyKanap = document.querySelector("#quantity").value;
+                    let imgKanap = img.src; 
+                    let altImg = img.alt;
+                    let priceKanap = document.querySelector("#price").textContent;
+                    
+                    console.log(img);
+                    console.log(idKanap, nameKanap, colorKanap, qtyKanap, imgKanap, altImg, priceKanap);
+                
+                    let productCartObj = {
+                        idKanap : idProduct,
+                        nameKanap : nameKanap,
+                        colorKanap : colorKanap,
+                        qtyKanap  : qtyKanap,
+                        imgKanap : imgKanap,
+                        altImg : altImg,
+                        priceKanap : priceKanap
+                    };
+                
+                    productCart.push(productCartObj);
+                
+                    let objCart = JSON.stringify(productCart);
+                    localStorage.setItem("cart", objCart);
+                
+                    alert("Ajouté au panier !");
+                }
+
+        } else {
+
+            let productCart = [];
+
+            let idKanap = idProduct;
+            let nameKanap = document.querySelector("#title").textContent;
+            let colorKanap = document.querySelector("#colors").value;
+            let qtyKanap = document.querySelector("#quantity").value;
+            let imgKanap = img.src; 
+            let altImg = img.alt;
+            let priceKanap = document.querySelector("#price").textContent;
+            
+            console.log(img);
+            console.log(idKanap, nameKanap, colorKanap, qtyKanap, imgKanap, altImg, priceKanap);
+        
+            let productCartObj = {
+                idKanap : idProduct,
+                nameKanap : nameKanap,
+                colorKanap : colorKanap,
+                qtyKanap  : qtyKanap,
+                imgKanap : imgKanap,
+                altImg : altImg,
+                priceKanap : priceKanap
+            };
+        
+            productCart.push(productCartObj);
+        
+            let objCart = JSON.stringify(productCart);
+            localStorage.setItem("cart", objCart);
+        
+            alert("Ajouté au panier !");    
+        }
+    }
+}
