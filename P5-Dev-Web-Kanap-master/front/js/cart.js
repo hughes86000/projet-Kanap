@@ -1,3 +1,4 @@
+let form = document.querySelector(".cart__order__form");
 let productLocalStorage = JSON.parse(localStorage.getItem("cart"));
 
 if (!productLocalStorage) {
@@ -183,22 +184,22 @@ function getForm() {
         validFirstName(this);
     });
 
-    // Ecoute de la modification du Nom
+    // Ecoute de la modification du prénom
     form.lastName.addEventListener('change', function() {
         validLastName(this);
     });
 
-    // Ecoute de la modification de l'Adresse
+    // Ecoute de la modification du prénom
     form.address.addEventListener('change', function() {
         validAddress(this);
     });
 
-    // Ecoute de la modification de la Ville
+    // Ecoute de la modification du prénom
     form.city.addEventListener('change', function() {
         validCity(this);
     });
 
-    // Ecoute de la modification de l'Email
+    // Ecoute de la modification du prénom
     form.email.addEventListener('change', function() {
         validEmail(this);
     });
@@ -299,12 +300,16 @@ function postForm() {
       }
     };
   
-    fetch("http://127.0.0.1:3000/api/products", options)
-        .then(response => response.json())
-        .then(data => {
-        localStorage.clear();
-        document.location.href = 'confirmation.html?id='+ data.orderId; 
-      });
+    if (validFirstName(form.firstName) & validLastName(form.lastName) & validAddress(form.address) & validCity(form.city) & validEmail(form.email)) {
+        fetch("http://127.0.0.1:3000/api/products/order", options)
+            .then(response => response.json())
+            .then(data => {
+            localStorage.clear();
+            document.location.href = 'confirmation.html?id='+ data.orderId;
+         });
+    }else{
+        alert("Veuillez remplir correctement les champs !");
+      }
   
   }); // fin eventListener postForm
   } // fin envoi du formulaire postForm
