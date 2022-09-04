@@ -29,7 +29,7 @@ if (!productLocalStorage) {
         productDivImg.appendChild(productImg);
         productImg.src = productLocalStorage[i].imgKanap;
         // productImg.alt = productLocalStorage.altImgProduit;
-        
+       
         // Insertion de l'élément "div" pour la description produit
         let productItemContent = document.createElement("div");
         productArticle.appendChild(productItemContent);
@@ -39,7 +39,7 @@ if (!productLocalStorage) {
         let productItemContentTitlePrice = document.createElement("div");
         productItemContent.appendChild(productItemContentTitlePrice);
         productItemContentTitlePrice.className = "cart__item__content__titlePrice";
-        
+       
         // Insertion du titre h2
         let productTitle = document.createElement("h2");
         productItemContentTitlePrice.appendChild(productTitle);
@@ -65,7 +65,7 @@ if (!productLocalStorage) {
         let productItemContentSettingsQuantity = document.createElement("div");
         productItemContentSettings.appendChild(productItemContentSettingsQuantity);
         productItemContentSettingsQuantity.className = "cart__item__content__settings__quantity";
-        
+       
         // Insertion de "Qté : "
         let productQty = document.createElement("p");
         productItemContentSettingsQuantity.appendChild(productQty);
@@ -80,6 +80,7 @@ if (!productLocalStorage) {
         productQuantity.setAttribute("min", "1");
         productQuantity.setAttribute("max", "100");
         productQuantity.setAttribute("name", "itemQuantity");
+       
 
         // Insertion de l'élément "div"
         let productItemContentSettingsDelete = document.createElement("div");
@@ -93,7 +94,7 @@ if (!productLocalStorage) {
         productSupprimer.innerHTML = "Supprimer";
         productSupprimer.addEventListener("click", (e) => {
             e.preventDefault;
-        
+       
             // enregistrer l'id et la couleur séléctionnés par le bouton supprimer
             let deleteId = productLocalStorage[i].idKanap;
             let deleteColor = productLocalStorage[i].colorKanap;
@@ -102,11 +103,11 @@ if (!productLocalStorage) {
             productLocalStorage = productLocalStorage.filter( elt => elt.idKanap !== deleteId || elt.colorKanap !== deleteColor);
 
             // envoyer les nouvelles données dans le localStorage
-            localStorage.setItem('cart', JSON.stringify(productLocalStorage));               
+            localStorage.setItem('cart', JSON.stringify(productLocalStorage));              
 
             // avertir de la suppression et recharger la page
             alert('Votre article a bien été supprimé.');
-            
+           
             //Si pas de produits dans le local storage on affiche que le panier est vide
             if (productLocalStorage.length === 0) {
                 localStorage.clear();
@@ -127,7 +128,7 @@ function getTotals(){
     for (var i = 0; i < myLength; ++i) {
         totalQtt += elemsQtt[i].valueAsNumber;
     }
-    
+   
     let productTotalQuantity = document.getElementById('totalQuantity');
     productTotalQuantity.innerHTML = totalQtt;
 
@@ -153,14 +154,14 @@ function modifyQtt() {
             //Selection de l'element à modifier en fonction de son id ET sa couleur
             let quantityModif = productLocalStorage[k].qtyKanap;
             let qttModifValue = qttModif[k].valueAsNumber;
-            
+           
             const resultFind = productLocalStorage.find((el) => el.qttModifValue !== quantityModif);
 
             resultFind.qtyKanap = qttModifValue;
             productLocalStorage[k].qtyKanap = resultFind.qtyKanap;
 
             localStorage.setItem("cart", JSON.stringify(productLocalStorage));
-        
+       
             // refresh rapide
             location.reload();
         })
@@ -169,15 +170,81 @@ function modifyQtt() {
 modifyQtt();
 
 
-//Instauration formulaire avec regex
-function getForm() {
-    // Ajout des Regex
-    let form = document.querySelector(".cart__order__form");
+// Ajout des Regex
 
     //Création des expressions régulières
     let emailRegExp = new RegExp('^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$');
     let charRegExp = new RegExp("^[a-zA-Z ,.'-]+$");
     let addressRegExp = new RegExp("^[0-9]{1,3}(?:(?:[,. ]){1}[-a-zA-Zàâäéèêëïîôöùûüç]+)+");
+
+//validation du prénom
+    const validFirstName = function(inputFirstName) {
+        let firstNameErrorMsg = inputFirstName.nextElementSibling;
+        let checker = charRegExp.test(inputFirstName.value);
+
+        if (checker) {
+            firstNameErrorMsg.innerHTML = '';
+        } else {
+            firstNameErrorMsg.innerHTML = 'Veuillez renseigner ce champ.';
+        }
+        return checker;
+    };
+
+    //validation du nom
+    const validLastName = function(inputLastName) {
+        let lastNameErrorMsg = inputLastName.nextElementSibling;
+        let checker = charRegExp.test(inputLastName.value);
+
+        if (checker) {
+            lastNameErrorMsg.innerHTML = '';
+        } else {
+            lastNameErrorMsg.innerHTML = 'Veuillez renseigner ce champ.';
+        }
+        return checker;
+    };
+
+    //validation de l'adresse
+    const validAddress = function(inputAddress) {
+        let addressErrorMsg = inputAddress.nextElementSibling;
+        let checker = addressRegExp.test(inputAddress.value);
+
+        if (checker) {
+            addressErrorMsg.innerHTML = '';
+        } else {
+            addressErrorMsg.innerHTML = 'Veuillez renseigner ce champ.';
+        }
+        return checker;
+    };
+
+    //validation de la ville
+    const validCity = function(inputCity) {
+        let cityErrorMsg = inputCity.nextElementSibling;
+        let checker = charRegExp.test(inputCity.value);
+
+        if (checker) {
+            cityErrorMsg.innerHTML = '';
+        } else {
+            cityErrorMsg.innerHTML = 'Veuillez renseigner ce champ.';
+        }
+        return checker;
+    };
+
+    //validation de l'email
+    const validEmail = function(inputEmail) {
+        let emailErrorMsg = inputEmail.nextElementSibling;
+        let checker = emailRegExp.test(inputEmail.value);
+
+        if (checker) {
+            emailErrorMsg.innerHTML = '';
+        } else {
+            emailErrorMsg.innerHTML = 'Veuillez renseigner votre email.';
+        }
+        return checker;
+    };
+
+//Instauration formulaire avec regex
+function getForm() {
+   
 
     // Ecoute de la modification du prénom
     form.firstName.addEventListener('change', function() {
@@ -204,60 +271,7 @@ function getForm() {
         validEmail(this);
     });
 
-    //validation du prénom
-    const validFirstName = function(inputFirstName) {
-        let firstNameErrorMsg = inputFirstName.nextElementSibling;
-
-        if (charRegExp.test(inputFirstName.value)) {
-            firstNameErrorMsg.innerHTML = '';
-        } else {
-            firstNameErrorMsg.innerHTML = 'Veuillez renseigner ce champ.';
-        }
-    };
-
-    //validation du nom
-    const validLastName = function(inputLastName) {
-        let lastNameErrorMsg = inputLastName.nextElementSibling;
-
-        if (charRegExp.test(inputLastName.value)) {
-            lastNameErrorMsg.innerHTML = '';
-        } else {
-            lastNameErrorMsg.innerHTML = 'Veuillez renseigner ce champ.';
-        }
-    };
-
-    //validation de l'adresse
-    const validAddress = function(inputAddress) {
-        let addressErrorMsg = inputAddress.nextElementSibling;
-
-        if (addressRegExp.test(inputAddress.value)) {
-            addressErrorMsg.innerHTML = '';
-        } else {
-            addressErrorMsg.innerHTML = 'Veuillez renseigner ce champ.';
-        }
-    };
-
-    //validation de la ville
-    const validCity = function(inputCity) {
-        let cityErrorMsg = inputCity.nextElementSibling;
-
-        if (charRegExp.test(inputCity.value)) {
-            cityErrorMsg.innerHTML = '';
-        } else {
-            cityErrorMsg.innerHTML = 'Veuillez renseigner ce champ.';
-        }
-    };
-
-    //validation de l'email
-    const validEmail = function(inputEmail) {
-        let emailErrorMsg = inputEmail.nextElementSibling;
-
-        if (emailRegExp.test(inputEmail.value)) {
-            emailErrorMsg.innerHTML = '';
-        } else {
-            emailErrorMsg.innerHTML = 'Veuillez renseigner votre email.';
-        }
-    };
+   
     }
 getForm();
 
@@ -265,7 +279,7 @@ function postForm() {
     const order = document.getElementById('order');
     order.addEventListener('click', (event) => {
     event.preventDefault();
-  
+ 
     // je récupère les données du formulaire dans un objet
     const contact = {
       firstName : document.getElementById('firstName').value,
@@ -281,25 +295,25 @@ function postForm() {
         products.push(productLocalStorage[i].idKanap);
     }
     console.log(products);
-  
+ 
     // je mets les valeurs du formulaire et les produits sélectionnés
     // dans un objet...
     const sendFormData = {
       contact,
       products,
     }
-  
-    // j'envoie le formulaire + localStorage (sendFormData) 
+ 
+    // j'envoie le formulaire + localStorage (sendFormData)
     // ... que j'envoie au serveur
-  
+ 
     const options = {
       method: 'POST',
       body: JSON.stringify(sendFormData),
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
       }
     };
-  
+ 
     if (validFirstName(form.firstName) & validLastName(form.lastName) & validAddress(form.address) & validCity(form.city) & validEmail(form.email)) {
         fetch("http://127.0.0.1:3000/api/products/order", options)
             .then(response => response.json())
@@ -310,7 +324,7 @@ function postForm() {
     }else{
         alert("Veuillez remplir correctement les champs !");
       }
-  
+ 
   }); // fin eventListener postForm
   } // fin envoi du formulaire postForm
   postForm();
